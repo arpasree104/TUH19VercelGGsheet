@@ -46,7 +46,7 @@
 <section class="login" id="login">
   <div class="login-card">
     <div class="login-brand">
-      <div class="brand-pair"><img src="https://img2.pic.in.th/logo-020c27d3e8c360c016.png" alt="TUH Quality Fair"><img src="https://img1.pic.in.th/images/logo-04.png" alt="HACC"></div>
+      <div class="brand-pair"><img src="/images/tuh-logo.png" alt="TUH Quality Fair"><img src="/images/hacc-logo.png" alt="HACC"></div>
       <h1>TUH 19 & HA-Regional 1</h1><p>ระบบบริหารงานประชุม</p><p class="en" style="color:#dceff1">TUH Conference Management</p>
     </div>
     <form class="login-form" id="loginForm" autocomplete="on"><div style="display:flex; border-bottom:1px solid #d9e3e8; margin-bottom:20px;"><a style="flex:1; padding:10px 0; text-align:center; text-decoration:none; color:var(--teal); border-bottom:2px solid var(--teal); font-weight:600; cursor:default;">Admin</a><a onclick="if(typeof show==='function')show('กำลังเปลี่ยนหน้า...'); else if(typeof setBusy==='function')setBusy(true,'กำลังเปลี่ยนหน้า...'); else Swal.fire({title:'กำลังเปลี่ยนหน้า...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()}); window.top.location.href=canonicalRoute('reviewer')" style="flex:1; padding:10px 0; text-align:center; text-decoration:none; color:#758593; font-weight:600; cursor:pointer;">Reviewer</a><a onclick="if(typeof show==='function')show('กำลังเปลี่ยนหน้า...'); else if(typeof setBusy==='function')setBusy(true,'กำลังเปลี่ยนหน้า...'); else Swal.fire({title:'กำลังเปลี่ยนหน้า...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()}); window.top.location.href=canonicalRoute('scanner')" style="flex:1; padding:10px 0; text-align:center; text-decoration:none; color:#758593; font-weight:600; cursor:pointer;">สแกนสิทธิ์</a></div><h2>เข้าสู่ระบบเจ้าหน้าที่<span class="en">Staff sign in</span></h2><div class="field"><label>Username / Email</label><input id="loginUser" name="username" autocomplete="username" required></div><div class="field password-wrap"><label>รหัสผ่าน<span class="en">Password</span></label><input type="password" id="loginPassword" name="password" autocomplete="current-password" required><button class="eye-btn" type="button" aria-label="แสดงหรือซ่อนรหัสผ่าน" onclick="togglePassword('loginPassword',this)">👁</button></div><label class="remember-row"><input type="checkbox" id="rememberLogin" checked><span>จำ Username และรหัสผ่านบนอุปกรณ์ส่วนตัวนี้<br><span class="en">Remember credentials on this device</span></span></label><button class="btn btn-primary" style="width:100%">เข้าสู่ระบบ<span class="en" style="color:#dceff1">Sign in</span></button><div style="display:flex; justify-content:space-between; margin-top:15px;"><a href="#" onclick="forgotPassword()" style="font-size:0.85rem; color:var(--teal); text-decoration:none;">ลืมรหัสผ่าน?</a><a href="#" onclick="signUp()" style="font-size:0.85rem; color:var(--teal); text-decoration:none; font-weight:600;">+ สมัครเข้าใช้งาน</a></div><div class="login-help">หากเปิดผ่าน Google Sites หรือเบราว์เซอร์ภายในแอปแล้วไม่สำเร็จ ให้ <a href="/admin?conferenceId=CONF-TUH-QF-2569" target="_blank" rel="noopener noreferrer">เปิด Web App โดยตรง</a> โดยไม่ต้องออกจากบัญชี Google</div></form>
@@ -54,7 +54,7 @@
 </section>
 <section class="app" id="app">
   <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-  <aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-logos"><img src="https://img2.pic.in.th/logo-020c27d3e8c360c016.png" alt="TUH"><img src="https://img1.pic.in.th/images/logo-04.png" alt="HACC"></div><div class="brand-label">TUH 19 & HA-Regional 1</div></div><div class="user"><b id="userName"></b><span class="en" id="userRole"></span></div><nav class="menu" id="menu"></nav></aside>
+  <aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-logos"><img src="/images/tuh-logo.png" alt="TUH"><img src="/images/hacc-logo.png" alt="HACC"></div><div class="brand-label">TUH 19 & HA-Regional 1</div></div><div class="user"><b id="userName"></b><span class="en" id="userRole"></span></div><nav class="menu" id="menu"></nav></aside>
   <div class="main"><header class="top"><div style="display:flex;align-items:center;"><button class="hamburger" onclick="toggleSidebar()">☰</button><div><b id="topTitle">ภาพรวม</b><span class="en" id="topSub">Current conference</span></div></div><div class="actions"><button class="btn btn-soft" onclick="refreshPage()">รีเฟรช</button><button class="btn btn-gold" onclick="logout()">ออกจากระบบ</button></div></header><main class="content">
     <section class="page active" id="page-dashboard">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -225,8 +225,8 @@ function installDirectAccessGuard(){
 function canonicalRoute(page){const routes={public:'/',admin:'/admin',reviewer:'/reviewer',scanner:'/scanner',launcher:'/launcher'};const target=routes[page||'public']||'/';return target+'?conferenceId='+encodeURIComponent(CID)}
 window.addEventListener('DOMContentLoaded',installDirectAccessGuard);
 
-const LOGO_TUH='https://img2.pic.in.th/logo-020c27d3e8c360c016.png';
-const LOGO_HACC='https://img1.pic.in.th/images/logo-04.png';
+const LOGO_TUH='/images/tuh-logo.png';
+const LOGO_HACC='/images/hacc-logo.png';
 const DATE_FIELDS=['EventStartAt','EventEndAt','RegistrationOpenAt','RegistrationCloseAt','PaymentCloseAt','SubmissionOpenAt','SubmissionCloseAt','ResultAnnouncementAt'];
 const OPTION_KEYS=['PREFIX_OPTIONS_JSON','POSITION_OPTIONS_JSON','PROFESSION_OPTIONS_JSON','ORGANIZATION_GROUP_OPTIONS_JSON','ORGANIZATION_OPTIONS_JSON','FOOD_TYPE_OPTIONS_JSON'];
 let TOKEN='',BOOT=null,CURRENT='dashboard',FOOD_ROWS=[];

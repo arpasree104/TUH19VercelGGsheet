@@ -39,6 +39,7 @@
     .dash-kpi-value { font-size:2.2rem; font-weight:700; color:var(--ink); line-height:1; }
     .dash-kpi-sub { font-size:0.8rem; color:#667a88; margin-top:8px; font-weight:500; }
     .dash-icon { position:absolute; right:15px; top:15px; font-size:2.5rem; opacity:0.1; }
+    .login-card .brand h1 { font-size:clamp(1.35rem,2.2vw,1.75rem); letter-spacing:-0.02em; white-space:nowrap; }
   </style>
 </head>
 <body>
@@ -48,15 +49,15 @@
 
 <section class="login" id="loginView">
   <div class="login-card">
-    <div class="brand"><div class="logos"><img src="https://img2.pic.in.th/logo-020c27d3e8c360c016.png" alt="TUH"><img src="https://img1.pic.in.th/images/logo-04.png" alt="HACC"></div><h1>TUH 19 & HA-Regional 1</h1><p>Reviewer Portal — ระบบประเมินผลงานวิชาการ</p><span class="en" style="color:#d5ebec">Academic review system</span></div>
+    <div class="brand"><div class="logos"><img src="/images/tuh-logo.png" alt="TUH"><img src="/images/hacc-logo.png" alt="HACC"></div><h1>TUH 19 & HA-Regional 1</h1><p>Reviewer Portal — ระบบประเมินผลงานวิชาการ</p><span class="en" style="color:#d5ebec">Academic review system</span></div>
     <form class="form" id="loginForm" autocomplete="on"><div style="display:flex; border-bottom:1px solid #d9e3e8; margin-bottom:20px;"><a onclick="if(typeof show==='function')show('กำลังเปลี่ยนหน้า...'); else if(typeof setBusy==='function')setBusy(true,'กำลังเปลี่ยนหน้า...'); else Swal.fire({title:'กำลังเปลี่ยนหน้า...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()}); window.top.location.href=canonicalRoute('admin')" style="flex:1; padding:10px 0; text-align:center; text-decoration:none; color:#758593; font-weight:600; cursor:pointer;">Admin</a><a style="flex:1; padding:10px 0; text-align:center; text-decoration:none; color:var(--teal); border-bottom:2px solid var(--teal); font-weight:600; cursor:default;">Reviewer</a><a onclick="if(typeof show==='function')show('กำลังเปลี่ยนหน้า...'); else if(typeof setBusy==='function')setBusy(true,'กำลังเปลี่ยนหน้า...'); else Swal.fire({title:'กำลังเปลี่ยนหน้า...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()}); window.top.location.href=canonicalRoute('scanner')" style="flex:1; padding:10px 0; text-align:center; text-decoration:none; color:#758593; font-weight:600; cursor:pointer;">สแกนสิทธิ์</a></div><h2>เข้าสู่ระบบ Reviewer</h2><div class="field"><label>Username / Email</label><input id="loginUser" name="username" autocomplete="username" required></div><div class="field password-wrap"><label>รหัสผ่าน<span class="en">Password</span></label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required><button type="button" class="eye" onclick="togglePassword()">👁</button></div><label class="remember"><input type="checkbox" id="rememberLogin" checked><span>จำ Username และรหัสผ่านบนอุปกรณ์ส่วนตัวนี้<span class="en">Remember credentials on this device</span></span></label><button class="btn primary" style="width:100%">เข้าสู่ระบบ</button><div style="display:flex; justify-content:space-between; margin-top:15px;"><a href="#" onclick="forgotPassword()" style="font-size:0.85rem; color:var(--teal); text-decoration:none;">ลืมรหัสผ่าน?</a><a href="#" onclick="signUp()" style="font-size:0.85rem; color:var(--teal); text-decoration:none; font-weight:600;">+ สมัครเข้าใช้งาน</a></div><div class="help">หากเปิดผ่าน Google Sites หรือเบราว์เซอร์ภายในแอปแล้วไม่สำเร็จ ให้ <a href="/reviewer?conferenceId=CONF-TUH-QF-2569" target="_blank" rel="noopener noreferrer">เปิด Web App โดยตรง</a> โดยไม่ต้องออกจากบัญชี Google</div></form>
   </div>
 </section>
 <section class="app hidden" id="appView">
   <aside class="sidebar">
     <div class="logos" style="margin-bottom:15px; flex-wrap:wrap">
-      <img src="https://img2.pic.in.th/logo-020c27d3e8c360c016.png" alt="TUH" style="max-height:40px">
-      <img src="https://img1.pic.in.th/images/logo-04.png" alt="HACC" style="max-height:40px">
+      <img src="/images/tuh-logo.png" alt="TUH" style="max-height:40px">
+      <img src="/images/hacc-logo.png" alt="HACC" style="max-height:40px">
     </div>
     <div style="margin-bottom: 30px">
       <b id="confName">TUH 19 & HA-Regional 1</b><br>

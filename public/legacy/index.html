@@ -113,9 +113,9 @@
   <div class="hero-carousel" id="heroCarousel">
     <article class="hero-slide active" data-hero-slide="0" aria-hidden="false">
       <div class="hero-inner">
-        <div class="hero-logo left"><img id="heroLeftLogo" src="https://img2.pic.in.th/logo-020c27d3e8c360c016.png" alt="TUH Quality Fair logo" referrerpolicy="no-referrer"></div>
+        <div class="hero-logo left"><img id="heroLeftLogo" src="/images/tuh-logo.png" alt="TUH Quality Fair logo" referrerpolicy="no-referrer"></div>
         <div class="hero-copy"><h1 id="confName" class="hero-title-fixed" aria-label="งานมหกรรมคุณภาพโรงพยาบาล ครั้งที่ 19 และงาน HA-Regional Forum ครั้งที่ 1 ประจำปี 2569"><span>งานมหกรรมคุณภาพ</span><span>โรงพยาบาล ครั้งที่ 19 และ</span><span>งาน HA-Regional Forum</span><span>ครั้งที่ 1 ประจำปี 2569</span></h1><p id="confDesc">กรุณารอสักครู่ ระบบกำลังโหลดข้อมูลปัจจุบัน</p><div id="confMeta"></div></div>
-        <div class="hero-logo right"><img id="heroRightLogo" src="https://img1.pic.in.th/images/logo-04.png" alt="HACC HA Regional Forum logo" referrerpolicy="no-referrer"></div>
+        <div class="hero-logo right"><img id="heroRightLogo" src="/images/hacc-logo.png" alt="HACC HA Regional Forum logo" referrerpolicy="no-referrer"></div>
       </div>
     </article>
     <article class="hero-slide" data-hero-slide="1" aria-hidden="true">
@@ -216,8 +216,8 @@ function installDirectAccessGuard(){
 function canonicalRoute(page){const routes={public:'/',admin:'/admin',reviewer:'/reviewer',scanner:'/scanner',launcher:'/launcher'};const target=routes[page||'public']||'/';return target+'?conferenceId='+encodeURIComponent(CID)}
 window.addEventListener('DOMContentLoaded',installDirectAccessGuard);
 
-const DEFAULT_LOGO='https://img2.pic.in.th/logo-020c27d3e8c360c016.png';
-const HACC_LOGO='https://img1.pic.in.th/images/logo-04.png';
+const DEFAULT_LOGO='/images/tuh-logo.png';
+const HACC_LOGO='/images/hacc-logo.png';
 let BOOT=null;
 let HERO_INDEX=0,HERO_TIMER=null,PDPA_READ=false;
 const $=s=>document.querySelector(s);
