@@ -5,6 +5,10 @@ const root=process.cwd();
 const portals=["index","admin","reviewer","scanner"];
 const defaultCid=process.env.NEXT_PUBLIC_DEFAULT_CONFERENCE_ID||"CONF-TUH-QF-2569";
 const appName=process.env.NEXT_PUBLIC_APP_NAME||"TUH Quality Fair Conference Management";
+const remoteTuhLogo="https://img2.pic.in.th/logo-020c27d3e8c360c016.png";
+const remoteHaccLogo="https://img1.pic.in.th/images/logo-04.png";
+const localTuhLogo="/images/tuh-logo.png";
+const localHaccLogo="/images/hacc-logo.png";
 const rpcCode=`async function rpc(n,...a){const response=await fetch('/api/gas',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:n,args:a,requestId:crypto.randomUUID(),timestamp:Date.now()})});let result;try{result=await response.json()}catch(e){throw new Error('การตอบกลับจากระบบไม่ถูกต้อง')}if(!response.ok||!result.success)throw new Error(result.message||'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ');return result.data}`;
 const canonicalCode=`function canonicalRoute(page){const routes={public:'/',admin:'/admin',reviewer:'/reviewer',scanner:'/scanner',launcher:'/launcher'};const target=routes[page||'public']||'/';return target+'?conferenceId='+encodeURIComponent(CID)}`;
 
@@ -34,7 +38,9 @@ for(const portal of portals){
     .replaceAll("<?= appName ?>",appName)
     .replaceAll("<?= directUrl ?>",`${route}?conferenceId=${encodeURIComponent(defaultCid)}`)
     .replaceAll("<?= appUrl ?>","")
-    .replaceAll("<?= conferenceId ?>",`'+(new URLSearchParams(location.search).get('conferenceId')||'${defaultCid}')+'`);
+    .replaceAll("<?= conferenceId ?>",`'+(new URLSearchParams(location.search).get('conferenceId')||'${defaultCid}')+'`)
+    .replaceAll(remoteTuhLogo,localTuhLogo)
+    .replaceAll(remoteHaccLogo,localHaccLogo);
   text=replaceFunction(text,"rpc",rpcCode);
   text=replaceFunction(text,"canonicalRoute",canonicalCode);
 
