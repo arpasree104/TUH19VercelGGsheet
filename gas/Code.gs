@@ -2849,3 +2849,332 @@ function registerNewUser(payload, conferenceId) {
     return {success: true};
   });
 }
+
+
+
+
+/** ===== Combined from gas/ApiActions.gs ===== **/
+/** Actions discovered from the production frontends. Do not expose arbitrary globals. */
+const API_ACTIONS = Object.freeze({
+  adminAddReviewer: adminAddReviewer,
+  adminAddUser: adminAddUser,
+  adminAssignReviewersBulk: adminAssignReviewersBulk,
+  adminBootstrap: adminBootstrap,
+  adminDashboard: adminDashboard,
+  adminGetRegistration: adminGetRegistration,
+  adminGetRegistrationSignSheet: adminGetRegistrationSignSheet,
+  adminGetReviewConfig: adminGetReviewConfig,
+  adminGetReviewer: adminGetReviewer,
+  adminGetUserScanHistory: adminGetUserScanHistory,
+  adminGetWorkScoreSummary: adminGetWorkScoreSummary,
+  adminListMealPasses: adminListMealPasses,
+  adminListPayments: adminListPayments,
+  adminListRegistrations: adminListRegistrations,
+  adminListReviewers: adminListReviewers,
+  adminListUsers: adminListUsers,
+  adminListWorks: adminListWorks,
+  adminPreviewMealPass: adminPreviewMealPass,
+  adminResendReviewerCreds: adminResendReviewerCreds,
+  adminSaveRegistration: adminSaveRegistration,
+  adminSearchDriveFiles: adminSearchDriveFiles,
+  adminSendDirectEmail: adminSendDirectEmail,
+  adminSendMealPasses: adminSendMealPasses,
+  adminUpdateRegistrationStatus: adminUpdateRegistrationStatus,
+  adminUpdateReviewer: adminUpdateReviewer,
+  adminUpdateUserStatus: adminUpdateUserStatus,
+  adminUpdateWorkStatus: adminUpdateWorkStatus,
+  adminUploadWorkFiles: adminUploadWorkFiles,
+  adminVerifyPayment: adminVerifyPayment,
+  commitImportBatch: commitImportBatch,
+  confirmEventScanner: confirmEventScanner,
+  emailMyMealPass: emailMyMealPass,
+  exportWorksToExcel: exportWorksToExcel,
+  getAdminSettings: getAdminSettings,
+  getEventScannerBootstrap: getEventScannerBootstrap,
+  getEventScannerRecent: getEventScannerRecent,
+  getMealPass: getMealPass,
+  getPublicBootstrap: getPublicBootstrap,
+  inspectEventScanner: inspectEventScanner,
+  loginUser: loginUser,
+  logoutUser: logoutUser,
+  lookupRegistrationForEdit: lookupRegistrationForEdit,
+  registerNewUser: registerNewUser,
+  replaceWorkFile: replaceWorkFile,
+  requestPasswordReset: requestPasswordReset,
+  reviewerBootstrap: reviewerBootstrap,
+  reviewerGetAssignment: reviewerGetAssignment,
+  reviewerSaveReview: reviewerSaveReview,
+  saveAdminSettings: saveAdminSettings,
+  saveRegistrationEdit: saveRegistrationEdit,
+  submitRegistration: submitRegistration,
+  submitWork: submitWork,
+  uploadExcelForImport: uploadExcelForImport,
+  uploadPaymentSlip: uploadPaymentSlip,
+  verifyWorkAccess: verifyWorkAccess
+});
+
+const API_WRITE_ACTIONS = Object.freeze({
+  adminAddReviewer:1, adminAddUser:1, adminAssignReviewersBulk:1,
+  adminResendReviewerCreds:1, adminSaveRegistration:1, adminSendDirectEmail:1,
+  adminSendMealPasses:1, adminUpdateRegistrationStatus:1, adminUpdateReviewer:1,
+  adminUpdateUserStatus:1, adminUpdateWorkStatus:1, adminUploadWorkFiles:1,
+  adminVerifyPayment:1, commitImportBatch:1, confirmEventScanner:1,
+  emailMyMealPass:1, loginUser:1, logoutUser:1, registerNewUser:1,
+  replaceWorkFile:1, requestPasswordReset:1, reviewerSaveReview:1,
+  saveAdminSettings:1, saveRegistrationEdit:1, submitRegistration:1,
+  submitWork:1, uploadExcelForImport:1, uploadPaymentSlip:1
+});
+
+
+
+/** ===== Combined from gas/ApiSecurity.gs ===== **/
+const API_PERMISSION_MAP = Object.freeze({
+  PUBLIC: Object.freeze([
+    'getPublicBootstrap','submitRegistration','lookupRegistrationForEdit',
+    'saveRegistrationEdit','uploadPaymentSlip','verifyWorkAccess','submitWork',
+    'replaceWorkFile','emailMyMealPass','getMealPass','loginUser',
+    'requestPasswordReset','registerNewUser'
+  ]),
+  REVIEWER: Object.freeze(['reviewerBootstrap','reviewerGetAssignment','reviewerSaveReview']),
+  SCANNER: Object.freeze([
+    'getEventScannerBootstrap','inspectEventScanner','confirmEventScanner',
+    'getEventScannerRecent'
+  ])
+});
+
+const API_ADMIN_ROLES = Object.freeze([
+  'SUPERADMIN','CONFERENCE_ADMIN','REGISTRATION_STAFF','FINANCE_STAFF',
+  'ACADEMIC_STAFF','FOOD_STAFF','VIEWER'
+]);
+
+function apiValidateEnvelope_(body) {
+  if (!body || typeof body !== 'object') throw apiError_('VALIDATION_ERROR','รูปแบบคำขอไม่ถูกต้อง');
+  if (!/^[A-Za-z][A-Za-z0-9_]{1,80}$/.test(String(body.action || ''))) {
+    throw apiError_('VALIDATION_ERROR','ชื่อคำสั่งไม่ถูกต้อง');
+  }
+  if (!Array.isArray(body.args) || body.args.length > 20) {
+    throw apiError_('VALIDATION_ERROR','พารามิเตอร์ไม่ถูกต้อง');
+  }
+  if (!/^[A-Za-z0-9-]{8,100}$/.test(String(body.requestId || ''))) {
+    throw apiError_('VALIDATION_ERROR','requestId ไม่ถูกต้อง');
+  }
+  const timestamp = Number(body.timestamp);
+  if (!isFinite(timestamp) || Math.abs(Date.now() - timestamp) > 5 * 60 * 1000) {
+    throw apiError_('STALE_REQUEST','คำขอหมดอายุ');
+  }
+}
+
+function apiValidateSecret_(secret) {
+  const expected = PropertiesService.getScriptProperties().getProperty('TUH_API_SECRET');
+  if (!expected || !secret || !apiConstantTimeEqual_(String(expected), String(secret))) {
+    throw apiError_('UNAUTHORIZED_PROXY','ไม่อนุญาตให้เชื่อมต่อ API');
+  }
+}
+
+function apiConstantTimeEqual_(a,b) {
+  const aa = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, a);
+  const bb = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, b);
+  let diff = aa.length ^ bb.length;
+  for (let i=0;i<Math.max(aa.length,bb.length);i++) diff |= (aa[i % aa.length] ^ bb[i % bb.length]);
+  return diff === 0;
+}
+
+function apiAuthorize_(action,args) {
+  if (API_PERMISSION_MAP.PUBLIC.indexOf(action) >= 0) return null;
+  if (action === 'logoutUser') return requireSession_(args[0], null, null);
+  if (API_PERMISSION_MAP.REVIEWER.indexOf(action) >= 0) return requireSession_(args[0], ['REVIEWER'], args[1]);
+  if (API_PERMISSION_MAP.SCANNER.indexOf(action) >= 0) {
+    return requireSession_(args[0], ['SUPERADMIN','CONFERENCE_ADMIN','REGISTRATION_STAFF','FOOD_STAFF'], args[1]);
+  }
+  if (action.indexOf('admin') === 0 || [
+    'getAdminSettings','saveAdminSettings','uploadExcelForImport',
+    'commitImportBatch','exportWorksToExcel'
+  ].indexOf(action) >= 0) return requireSession_(args[0], API_ADMIN_ROLES, args[1]);
+  throw apiError_('FORBIDDEN','ไม่มีสิทธิ์ใช้คำสั่งนี้');
+}
+
+function apiError_(code,message) {
+  const error = new Error(message);
+  error.apiCode = code;
+  return error;
+}
+
+function apiClaimRequest_(requestId) {
+  const cache = CacheService.getScriptCache();
+  const key = 'api_request_' + requestId;
+  if (cache.get(key)) throw apiError_('DUPLICATE_REQUEST','คำขอนี้ถูกประมวลผลแล้ว');
+  cache.put(key, 'PROCESSING', 600);
+  return key;
+}
+
+function apiCompleteRequest_(key) {
+  if (key) CacheService.getScriptCache().put(key, 'DONE', 21600);
+}
+
+function apiReleaseRequest_(key) {
+  if (key) CacheService.getScriptCache().remove(key);
+}
+
+
+
+/** ===== Combined from gas/ApiResponse.gs ===== **/
+function apiJson_(payload) {
+  return ContentService.createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function apiSuccess_(data,requestId) {
+  return {success:true,data:data,message:'',requestId:requestId};
+}
+
+function apiFailure_(error,requestId) {
+  const known = error && error.apiCode;
+  return {
+    success:false,
+    message: known ? error.message : 'ไม่สามารถดำเนินการได้ กรุณาติดต่อผู้ดูแลระบบ',
+    errorCode: known || 'INTERNAL_ERROR',
+    requestId:requestId || ''
+  };
+}
+
+
+
+/** ===== Combined from gas/ApiGateway.gs ===== **/
+function doPost(e) {
+  let body = null;
+  let requestId = '';
+  let claimKey = '';
+  try {
+    if (!e || !e.postData || !e.postData.contents) throw apiError_('INVALID_JSON','ไม่พบข้อมูลคำขอ');
+    if (e.postData.contents.length > 28 * 1024 * 1024) throw apiError_('PAYLOAD_TOO_LARGE','ข้อมูลมีขนาดใหญ่เกินกำหนด');
+    body = JSON.parse(e.postData.contents);
+    requestId = String(body.requestId || '');
+    apiValidateEnvelope_(body);
+    apiValidateSecret_(body.secret);
+    const action = String(body.action);
+    const fn = API_ACTIONS[action];
+    if (!fn) throw apiError_('ACTION_NOT_ALLOWED','ไม่อนุญาตให้เรียกคำสั่งนี้');
+    apiAuthorize_(action, body.args);
+    if (API_WRITE_ACTIONS[action]) claimKey = apiClaimRequest_(requestId);
+    const legacyResult = fn.apply(null, body.args);
+    if (!legacyResult || legacyResult.success !== true) {
+      const message = legacyResult && legacyResult.message ? legacyResult.message : 'ไม่สามารถดำเนินการได้';
+      throw apiError_(legacyResult && legacyResult.errorCode || 'ACTION_FAILED', message);
+    }
+    apiCompleteRequest_(claimKey);
+    return apiJson_(apiSuccess_(legacyResult.data, requestId));
+  } catch (error) {
+    apiReleaseRequest_(claimKey);
+    try { logSystem_('doPost:' + (body && body.action || 'unknown'), error); } catch (ignore) {}
+    return apiJson_(apiFailure_(error, requestId));
+  }
+}
+
+
+
+/** ===== Combined from gas/SchemaMigration.gs ===== **/
+/**
+ * Adds only headers required by the audited backend that are absent from the
+ * current workbook export. Existing columns, rows, values and formats are not
+ * moved or deleted.
+ */
+function migrateCurrentWorkbookSchema() {
+  const required = Object.freeze({
+    Works: Object.freeze([
+      'CategoryName',
+      'PresentationTypeName',
+      'Region4Affiliation'
+    ]),
+    AttendanceCheckIns: Object.freeze([
+      'CheckInSession',
+      'CheckInSessionName'
+    ])
+  });
+  const ss = getSpreadsheet_();
+  const added = [];
+  Object.keys(required).forEach(function(sheetName) {
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) throw new Error('ไม่พบชีต ' + sheetName);
+    const lastColumn = Math.max(sheet.getLastColumn(), 1);
+    const headers = sheet.getRange(1, 1, 1, lastColumn).getDisplayValues()[0];
+    required[sheetName].forEach(function(header) {
+      if (headers.indexOf(header) >= 0) return;
+      const column = sheet.getLastColumn() + 1;
+      sheet.getRange(1, column).setValue(header);
+      sheet.getRange(1, column)
+        .setBackground(APP.THEME.TEAL)
+        .setFontColor('#ffffff')
+        .setFontWeight('bold')
+        .setHorizontalAlignment('center')
+        .setWrap(true);
+      added.push({sheet:sheetName, header:header, column:column});
+      headers.push(header);
+    });
+    sheet.setFrozenRows(1);
+  });
+  return {
+    success:true,
+    added:added,
+    message:added.length ? 'เพิ่มคอลัมน์ที่ขาดเรียบร้อย' : 'Schema ถูกต้องอยู่แล้ว'
+  };
+}
+
+
+
+/** ===== Combined from gas/ApiSetupAndTests.gs ===== **/
+function setupVercelIntegration(frontendUrl, apiSecret) {
+  if (!/^https:\/\//i.test(String(frontendUrl || ''))) throw new Error('Frontend URL ต้องเป็น HTTPS');
+  if (String(apiSecret || '').length < 32) throw new Error('API Secret ต้องยาวอย่างน้อย 32 ตัวอักษร');
+  PropertiesService.getScriptProperties().setProperties({
+    TUH_FRONTEND_URL: String(frontendUrl).replace(/\/+$/,''),
+    TUH_API_SECRET: String(apiSecret)
+  });
+  return {success:true,frontendUrl:String(frontendUrl).replace(/\/+$/,'')};
+}
+
+function testApiConfiguration() {
+  const p = PropertiesService.getScriptProperties();
+  return {
+    success: !!p.getProperty('TUH_API_SECRET') && !!p.getProperty('TUH_FRONTEND_URL'),
+    frontendConfigured: !!p.getProperty('TUH_FRONTEND_URL'),
+    secretConfigured: !!p.getProperty('TUH_API_SECRET')
+  };
+}
+
+function testDatabaseConnection() {
+  const ss = getSpreadsheet_();
+  return {success:true,spreadsheetName:ss.getName(),sheetCount:ss.getSheets().length};
+}
+
+function testDriveConnection() {
+  const folders = jsonParse_(getSetting_(APP.DEFAULT_CONFERENCE_ID,'DRIVE_FOLDERS_JSON','{}'),{});
+  const checked = Object.keys(folders).map(function(name){
+    const folder = DriveApp.getFolderById(folders[name]);
+    return {name:name,id:folder.getId(),accessible:true};
+  });
+  return {success:true,folders:checked};
+}
+
+function validateDatabaseSchema() {
+  const ss = getSpreadsheet_();
+  const issues = [];
+  Object.keys(DB_SCHEMA).forEach(function(name){
+    const sheet = ss.getSheetByName(name);
+    if (!sheet) { issues.push({sheet:name,error:'MISSING_SHEET'}); return; }
+    const actual = sheet.getRange(1,1,1,Math.max(sheet.getLastColumn(),1)).getDisplayValues()[0];
+    DB_SCHEMA[name].forEach(function(header){
+      if (actual.indexOf(header) < 0) issues.push({sheet:name,error:'MISSING_HEADER',header:header});
+    });
+  });
+  return {success:issues.length===0,issues:issues,sheetCount:Object.keys(DB_SCHEMA).length};
+}
+
+function testPublicApi() {
+  return getPublicBootstrap(APP.DEFAULT_CONFERENCE_ID);
+}
+
+function testAuthenticatedApi(token) {
+  const context = requireSession_(token, null, APP.DEFAULT_CONFERENCE_ID);
+  return {success:true,data:{userId:context.user.UserID,role:context.role}};
+}
+
