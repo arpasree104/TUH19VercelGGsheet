@@ -2470,6 +2470,15 @@ function adminDashboard(token, conferenceId, forceRefresh, filters) {
       ptMap[pt.PresentationTypeID] = pt.TypeNameTH || pt.TypeCode || pt.PresentationTypeID;
     });
 
+    // Fetch WorkCategories to map CategoryID to category record.
+    // เดิมมีการเรียก categories[w.CategoryID] ด้านล่าง แต่ยังไม่ได้ประกาศตัวแปร
+    // จึงทำให้ Dashboard หยุดด้วย ReferenceError: categories is not defined
+    var categories = {};
+    findMany_('WorkCategories', { ConferenceID: cid }).forEach(function(category) {
+      if (!category || !category.CategoryID) return;
+      categories[String(category.CategoryID)] = category;
+    });
+
     // Chart 3: Works by INTERNAL / EXTERNAL
     var chartWorksByStatus = {};
     var chartWorksByCategory = {};
@@ -2480,7 +2489,11 @@ function adminDashboard(token, conferenceId, forceRefresh, filters) {
       chartWorksByStatus[s]++;
       
       // Works by Category
-      var cat = w.CategoryID ? (categories[w.CategoryID] ? categories[w.CategoryID].CategoryNameTH : w.CategoryID) : 'ไม่ระบุ';
+      var categoryId = clean_(w.CategoryID);
+      var categoryRow = categoryId ? categories[String(categoryId)] : null;
+      var cat = categoryRow
+        ? (clean_(categoryRow.CategoryNameTH) || clean_(categoryRow.CategoryNameEN) || clean_(categoryRow.CategoryCode) || categoryId)
+        : (clean_(w.CategoryName) || categoryId || 'ไม่ระบุ');
       if (!chartWorksByCategory[cat]) chartWorksByCategory[cat] = 0;
       chartWorksByCategory[cat]++;
       
