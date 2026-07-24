@@ -13,7 +13,7 @@ const APP = Object.freeze({
   DEFAULT_CONFERENCE_ID: 'CONF-TUH-QF-2569',
   PRESENTATION_DEADLINE: '2027-02-28T23:59:59',
   SPREADSHEET_ID: '', // เว้นว่างเมื่อเป็นสคริปต์ผูกกับ Google Sheet
-  ROOT_FOLDER_ID: '',
+  ROOT_FOLDER_ID: '1aA7uAW-aRy-7iY2xsYScwHuggvv2gD3X',
   DEFAULT_LOGO_URL: 'https://img2.pic.in.th/logo-020c27d3e8c360c016.png',
   MAX_UPLOAD_MB: 25,
   SESSION_HOURS: 12,
@@ -2175,11 +2175,11 @@ function adminResendReviewerCreds(token,conferenceId,reviewerId){
     if(u) {
       updateRecord_('Users',u.__row,{PasswordHash:hashPassword_(pass)});
     } else {
-      appendRecord_('Users',{UserID:nextId_('USR'),Email:r.Email,PasswordHash:hashPassword_(pass),FullName:(r.Prefix||'')+r.FirstName+' '+r.LastName,IsActive:true,CreatedAt:new Date(),UpdatedAt:new Date()});
+      appendRecord_('Users',{UserID:nextId_('USR'),Email:r.Email,PasswordHash:hashPassword_(pass),FullName:(r.Prefix||'')+r.FirstName+' '+r.LastName,Status:'ACTIVE',IsActive:true,CreatedAt:new Date(),UpdatedAt:new Date()});
     }
     let role = findOne_('UserConferenceRoles',{ConferenceID:conferenceId,UserID:u?u.UserID:'',Role:'REVIEWER'});
     if(!role && u){
-      appendRecord_('UserConferenceRoles',{ConferenceID:conferenceId,UserID:u.UserID,Role:'REVIEWER',PermissionsJson:JSON.stringify({ReviewerID:reviewerId}),CreatedAt:new Date()});
+      appendRecord_('UserConferenceRoles',{ConferenceID:conferenceId,UserID:u.UserID,Role:'REVIEWER',PermissionsJson:JSON.stringify({ReviewerID:reviewerId}),Status:'ACTIVE',CreatedAt:new Date()});
     }
     const html='<p>เรียน '+r.FirstName+' '+r.LastName+'</p><p>ระบบขอแจ้งรหัสผ่านสำหรับเข้าสู่ระบบพิจารณาผลงานวิชาการ</p><p>อีเมล: '+r.Email+'<br>รหัสผ่าน: <b>'+pass+'</b></p><p><a href="'+buildWebAppRouteUrl_('login',conferenceId)+'">เข้าสู่ระบบคลิกที่นี่</a></p>';
     sendEmailLogged_(conferenceId,r.Email,'รหัสผ่านเข้าสู่ระบบพิจารณาผลงาน',html,'ACCOUNT',reviewerId,null);
@@ -2199,7 +2199,20 @@ function adminListUsers(token,conferenceId){
     const roles = findMany_('UserConferenceRoles',{ConferenceID:conferenceId});
     const users = findMany_('Users',{});
     const map = {}; users.forEach(u=>map[u.UserID]=u);
-    return serialize_(roles.map(r=>({UserID:r.UserID,Email:map[r.UserID]?map[r.UserID].Email:'',FullName:map[r.UserID]?map[r.UserID].FullName:'',Role:r.Role,Status:bool_(map[r.UserID]?map[r.UserID].IsActive:false)?'ACTIVE':'INACTIVE'})));
+    return serialize_(roles.map(function(r){
+      const u = map[r.UserID];
+      let rawStatus = u ? (u.Status !== undefined && u.Status !== '' ? u.Status : (bool_(u.IsActive) ? 'ACTIVE' : 'INACTIVE')) : 'INACTIVE';
+      let statusStr = String(rawStatus).toUpperCase();
+      if (statusStr === 'TRUE') statusStr = 'ACTIVE';
+      if (statusStr === 'FALSE') statusStr = 'INACTIVE';
+      return {
+        UserID: r.UserID,
+        Email: u ? u.Email : '',
+        FullName: u ? u.FullName : '',
+        Role: r.Role,
+        Status: statusStr
+      };
+    }));
   });
 }
 function adminAddUser(token,conferenceId,email,role){
@@ -2208,11 +2221,11 @@ function adminAddUser(token,conferenceId,email,role){
     email=clean_(email).toLowerCase();
     let u = findOne_('Users',{Email:email});
     if(!u) {
-       u = {UserID:nextId_('USR'),Email:email,PasswordHash:hashPassword_(email),FullName:email.split('@')[0],IsActive:true,CreatedAt:new Date(),UpdatedAt:new Date()};
+       u = {UserID:nextId_('USR'),Email:email,PasswordHash:hashPassword_(email),FullName:email.split('@')[0],Status:'ACTIVE',IsActive:true,CreatedAt:new Date(),UpdatedAt:new Date()};
        appendRecord_('Users',u);
     }
     let r = findOne_('UserConferenceRoles',{ConferenceID:conferenceId,UserID:u.UserID,Role:role});
-    if(!r) appendRecord_('UserConferenceRoles',{ConferenceID:conferenceId,UserID:u.UserID,Role:role,PermissionsJson:'{}',CreatedAt:new Date()});
+    if(!r) appendRecord_('UserConferenceRoles',{UserConferenceRoleID:nextId_('UCR'),ConferenceID:conferenceId,UserID:u.UserID,Role:role,PermissionsJson:'{}',Status:'ACTIVE',AssignedAt:new Date(),AssignedBy:''});
     return {success:true};
   });
 }
@@ -2220,7 +2233,9 @@ function adminUpdateUserStatus(token,conferenceId,userId,status){
   return runSafely_('adminUpdateUserStatus',function(){
     requireSession_(token,['SUPERADMIN'],conferenceId);
     let u = findOne_('Users',{UserID:userId});
-    if(u) updateRecord_('Users',u.__row,{IsActive:status==='ACTIVE',UpdatedAt:new Date()});
+    if(u) updateRecord_('Users',u.__row,{Status:status,IsActive:status==='ACTIVE',UpdatedAt:new Date()});
+    let r = findOne_('UserConferenceRoles',{ConferenceID:conferenceId,UserID:userId});
+    if(r) updateRecord_('UserConferenceRoles',r.__row,{Status:status});
     return {success:true};
   });
 }
